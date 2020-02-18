@@ -1,0 +1,252 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+## Exercise 1
+##### a) Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of nu in the grid seq(175,185,by=0.25). Plot the power as a function of nu.
+We generate two samples of sizes 30 from 
+a standard normal distribution and programme loops to calculate the power of the t-test for every value of nu:
+```{r}
+n=m=30;mu=180;sd=5;B=1000;p=numeric(B);
+nu=seq(175,185,by=0.25);
+power=vector();
+for(i in 1:41){
+  for(b in 1:B){
+    x=rnorm(n,mu,sd);
+    y=rnorm(m,nu[i],sd);
+    p[b]=t.test(x,y,var.equal = TRUE)[[3]];
+  }
+  power[i]=mean(p<0.05)
+}
+plot(nu,power,type="p");
+```
+
+##### b) Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot. 
+Change n and m to 30:
+
+```{r}
+p2=numeric(B);
+power2=vector();
+n2=m2=100;
+for(i in 1:41){
+  for(b in 1:B){
+    x2=rnorm(n2,mu,sd);
+    y2=rnorm(m2,nu[i],sd);
+    p2[b]=t.test(x2,y2,var.equal = TRUE)[[3]];
+  }
+  power2[i]=mean(p2<0.05);
+}
+plot(nu,power,type="p");
+lines(nu,power2,type="p",col="red");
+```
+
+##### c) Set n=m=30, mu=180 and sd=15. Repeat the preceding exercise.
+
+Change sd to 15:
+
+```{r}
+sd3=15;p3=numeric(B);
+power3=vector();
+for(i in 1:41){
+  for(b in 1:B){
+    x3=rnorm(n,mu,sd3);
+    y3=rnorm(m,nu[i],sd3);
+    p3[b]=t.test(x3,y3,var.equal = TRUE)[[3]];
+  }
+  power3[i]=mean(p3<0.05);
+}
+plot(nu,power,type="p");
+lines(nu,power2,type="p",col="red");
+lines(nu,power3,type="p",col="blue");
+```
+
+##### d) Explain your findings.
+As in a), we can see that if nu gets closer to 180 which equals mu, the power of t-test gets smaller. COmpare b) with a), we can find out that if we enlarge the size of samples, the nu has to be more closer to 180 to get a low power. It is more accurate. When it comes to c), we can see that with the growth of sd, the rate of the change of power curve becomes smaller, which means the probability that t-test rejects the null hypothesis becomes smaller.
+
+
+## Exercise 2
+
+
+## Exercise 3
+##### a) Make an appropriate plot of this data set. What marketing advice(s) would you give to the marketing manager? Are there any inconsistencies in the data? If so, try to fix these.
+We can make a histiogram and a QQ-plot to show the data set. From the histogram and QQ-plot of the first month bills, we can see that most subscribers' bills is between 0 to 20; bills more than 70 are also of a large quantity. So my advice for the manager is to set two kinds of month bills: one is between 0 to 20, the other is more than 70.
+```{r}
+data=read.table(file="telephone.txt",header=TRUE)
+hist(data$Bills,prob=T);
+qqnorm(data$Bills);
+```
+
+##### b) By using a bootstrap test with the test statistic T = median(X1,...,X200), test whether the data telephone.txt stems from the exponential distribution Exp(λ) with some λ from [0.01, 0.1].
+In order to test lamda from[0.01,0.1],let lamda=seq(0.01,0.1,by=0.01);for every lamda, use bootstrap test.
+```{r}
+lamda=seq(0.01,0.1,by=0.01);
+length(lamda);
+bills=data$Bills;
+t=median(bills);
+B=1000;
+tstar=numeric(B);
+p=numeric(10);
+n=length(bills);
+for(i in 1:10){
+  for (j in 1:B){
+    xstar=rexp(n,lamda[i]);
+    tstar[j]=median(xstar);
+  }
+  pl=sum(tstar<t)/B;
+  pr=sum(tstar>t)/B;
+  p[i]=2*min(pl,pr);
+}
+p;
+```
+We can easily find out that p[3] is bigger than 0.05, which means when data$Bills stems from the exponential distribution Exp(0.03);
+
+##### c) Construct a 95% bootstrap confidence interval for the population median of the sample.
+Confidence 1-2*alpha=0.95, according to the formula its confidence interval should be
+[2*T-Tstar(1-alpha),2*T=Tstar(alpha)];
+```{r}
+bills=data$Bills;
+B=1000;
+Tstar=numeric(B);
+T1=median(bills);
+for(i in 1:B){
+  Xstar=sample(bills,replace = TRUE);
+  Tstar[i]=median(Xstar);
+}
+Tstar25=quantile(Tstar,0.025);
+Tstar975=quantile(Tstar,0.975);
+sum(Tstar<Tstar25);
+c(2*T1-Tstar975,2*T1-Tstar25);
+```
+
+##### d) Assuming X1 , . . . Xn ∼ Exp(λ) and using the central limit theorem for the sample mean, estimate λ and construct again a 95% confidence interval for the population median. Comment on your findings.
+Central limit theorem establishes that, in some situations, when independent random variables are added, their properly normalized sum tends toward a normal distribution even if the original variables themselves are not normally distributed. We can set up 1,000 sets of samples, each group sampling 50 data. The mean of 1000 samples is close to the population mean. According to the exponential distribution, mean=1/lamda, so lamda is about 0.022.
+```{r}
+B=1000;
+s=numeric(B);
+for(i in 1:B){
+  sample=sample(bills,50);
+  sample_mean=mean(sample);
+  s[i]=sample_mean;
+}
+s_mean=mean(s);
+s_var=var(s);
+lamda=1/s_mean;
+lamda
+```
+According to the above distribution,rexp(n,lamda): 
+```{r}
+B=1000;
+Tstar=numeric(B);
+T1=median(bills);
+for(i in 1:B){
+  Xstar=sample(rexp(n,lamda));
+  Tstar[i]=median(Xstar);
+}
+Tstar25=quantile(Tstar,0.025);
+Tstar975=quantile(Tstar,0.975);
+sum(Tstar<Tstar25);
+c(2*T1-Tstar975,2*T1-Tstar25);
+```
+
+##### e) Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test
+to check whether the fraction of the bills less than 10 euro is at most 25%.
+Null hypothesis: median bill >= 40 euro. Choose sign test. The result shows p-value = 0.009698, which is smaller than 0.05, so reject H0, the median bill is smaller than 40 euro.
+```{r}
+binom.test(sum(bills>40),200,al="l");
+```
+
+Null hypothesis: the fraction of bills less than 10 euro is at most 25%; p-value=0.3983,the fraction of the bills less than 10 euro is at most 25%. 
+```{r}
+low=sum(bills<10);
+binom.test(low,200,p=0.25,alternative="greater",conf.level = 0.9)
+```
+
+
+
+## Exercise 4 
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 5
+
+##### a) Test whether the distributions of the chicken weights for meatmeal and sunflower groups are different by performing three tests: the two samples t-test (argue whether the data are paired or not), the Mann-Whitney test and the Kolmogorov-Smirnov test. Comment on your findings.
+
+```{r density}
+data("chickwts")
+meatmealChick <- chickwts$weight[chickwts$feed == 'meatmeal']
+sunflowerChick <- chickwts$weight[chickwts$feed == 'sunflower']
+par(mfrow = c(1,2))
+plot(density(meatmealChick))
+plot(density(sunflowerChick))
+```
+
+```{r t-test}
+data("chickwts")
+par(mfrow = c(1,1))
+t.test(meatmealChick, sunflowerChick, var.equal = T)
+```
+p-value = 0.04047 < 0.05, so we reject H0 and conclude that a significant difference does exist, which means the mean chicken weights of meatmeal and sunflower groups are different.
+
+It requires both types of weights should be normally distributed and Variances between two groups be equal. According to density plots, the distribution of sunflower is non-normal distribution, so the two-sample t-test is invalid. 
+
+```{r Mann-Whitney test}
+wilcox.test(meatmealChick, sunflowerChick)
+```
+The p-value is 0.06882 > 0.05, If the p-value is larger than 0.05, we cannot conclude that a significant difference exists. The conclusion is that the chicken weights of meatmeal and sunflower groups share the same median. 
+
+We require the two data samples are independent and the samples do not affect each other. So in this case, the test is valid.	
+
+```{r Kolmogorov-Smirnov test}
+ks.test(meatmealChick, sunflowerChick)
+```
+The p-value is 0.1085 > 0.05, the chicken weights of meatmeal and sunflower groups should be identical and balanced in median, variability, and the shape of the distribution.
+
+##### b) Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is the best feed supplement?
+```{r}
+chickaov=lm(weight ~ feed, data=chickwts)
+anova(chickaov)
+```
+The p-value of the test is highly significant (p=5.94e−10), therefore we conclude the alternative, that at least one feed type has a different average weight. Hence the type of feed supplement has an effect on the weight of the chicks.
+
+```{r estimated chick weights}
+library("lattice")
+xyplot(weight ~ feed, data=chickwts, main="", type=c("p","a")) 
+```
+
+The plot above explains which feed types are producing the highest average weights.
+```{r}
+summary(chickaov)
+```
+The estimated chick weights for each of the six supplements are: casein 323.6, horsebean: 160.2, linseed: 218.8, meatmeal: 276.9, soybean: 246.4, sunflower: 328.9.
+
+Sunflower and casein are the best feed supplements.
+
+##### c) Check the ANOVA model assumptions by using relevant diagnostic tools.
+```{r}
+opar <- par(mfrow = c(2, 2), oma = c(0, 0, 1.1, 0),
+            mar = c(4.1, 4.1, 2.1, 1.1))
+plot(chickaov)
+
+par(mfrow=c(1,1))
+qqnorm(residuals(chickaov))
+```
+
+The plots demonstrate that the assumptions of ANOVA were satisfied as the residuals versus fitted values plot shows roughly constant variance, and the QQ-Plot shows normality of the residuals.
+
+##### d) Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the test in b)? Explain possible differences between this conclusion and the conclusion from b).
+
+```{r}
+kruskal.test(weight ~ feed, data=chickwts) 
+```
+The command kruskal.test performs the Kruskal-Wallis test and yields a p-value. The p-value for testing H0 is 5.113e-07, hence H0 is rejected. the type of feed supplement has an effect on the weight of the chicks.
+
+The one-way ANOVA also yield a significant difference. From the qq plot above,the residuals do not seem to deviate significantly from normal, and both tests could be used here.
+
+
