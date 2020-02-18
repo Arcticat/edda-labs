@@ -72,7 +72,7 @@ As in a), we can see that if nu gets closer to 180 which equals mu, the power of
 
 ## Exercise 3
 ##### a) Make an appropriate plot of this data set. What marketing advice(s) would you give to the marketing manager? Are there any inconsistencies in the data? If so, try to fix these.
-We can make a histiogram and a QQ-plot to show the data set. From the histogram and QQ-plot of the first month bills, we can see that most subscribers' bills is between 0 to 20; bills more than 70 are also of a large quantity. So my advice for the manager is to set two kinds of month bills: one is between 0 to 20, the other is more than 70.
+We can make a histiogram and a QQ-plot to show the data set. From the histogram and QQ-plot of the first month bills, we can see that most subscribers' bills is between 0 to 20; bills more than 70 are also of a large quantity. So my advice for the manager is to set two kinds of month bills: one is between 0 to 20, the other is more than 70. We don't think there is any inconsistency in the data. For 0, people may just don't use mobile phones.
 ```{r}
 data=read.table(file="telephone.txt",header=TRUE)
 hist(data$Bills,prob=T);
