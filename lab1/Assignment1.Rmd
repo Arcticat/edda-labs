@@ -1,12 +1,13 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
+# EDDA Assignment 1
 
 ## Exercise 1
-##### a) Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of nu in the grid seq(175,185,by=0.25). Plot the power as a function of nu.
+##### a)
 We generate two samples of sizes 30 from 
 a standard normal distribution and programme loops to calculate the power of the t-test for every value of nu:
 ```{r}
@@ -24,7 +25,7 @@ for(i in 1:41){
 plot(nu,power,type="p");
 ```
 
-##### b) Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot. 
+##### b)
 Change n and m to 30:
 
 ```{r}
@@ -43,7 +44,7 @@ plot(nu,power,type="p");
 lines(nu,power2,type="p",col="red");
 ```
 
-##### c) Set n=m=30, mu=180 and sd=15. Repeat the preceding exercise.
+##### c)
 
 Change sd to 15:
 
@@ -63,12 +64,84 @@ lines(nu,power2,type="p",col="red");
 lines(nu,power3,type="p",col="blue");
 ```
 
-##### d) Explain your findings.
-As in a), we can see that if nu gets closer to 180 which equals mu, the power of t-test gets smaller. COmpare b) with a), we can find out that if we enlarge the size of samples, the nu has to be more closer to 180 to get a low power. It is more accurate. When it comes to c), we can see that with the growth of sd, the rate of the change of power curve becomes smaller, which means the probability that t-test rejects the null hypothesis becomes smaller.
+##### d)
+As in a), we can see that if nu gets closer to 180 which equals mu, the power of t-test gets smaller. Compare b) with a), we can find out that if we enlarge the size of samples, the nu has to be more closer to 180 to get a low power. It is more accurate. When it comes to c), we can see that with the growth of sd, the rate of the change of power curve becomes smaller, which means the probability that t-test rejects the null hypothesis becomes smaller.
 
 
 ## Exercise 2
 
+#### a)
+
+$H_0 : \mu = \mu_0$ (population is normally distributed)
+
+```{r}
+light79_raw <- read.delim("./light1879.txt", header = FALSE, sep = "")
+light82_raw <- read.delim("./light1882.txt", header = FALSE, fill = TRUE, sep = "")
+light_raw <- read.delim("./light.txt", header = FALSE, fill = TRUE, sep = "")
+
+light79 <- unlist(na.omit(light79_raw) + 299000, use.name = FALSE)
+light82 <- unlist(na.omit(light82_raw) + 299000, use.name = FALSE)
+light <- unlist((7.442 / ((na.omit(light_raw)/1000) + 24.8) * 1000000), use.names = FALSE)
+
+par(mfrow = c(1,3))
+hist(light79)
+boxplot(light79, main = "Box plot of light79")
+qqnorm(light79, main = "Normal Q-Q plot of light79")
+qqline(light79)
+shapiro.test(light79)
+
+par(mfrow = c(1,3))
+hist(light82)
+boxplot(light82, main = "Box plot of light82")
+qqnorm(light82, main = "Normal Q-Q plot of light82")
+qqline(light82)
+shapiro.test(light82)
+
+par(mfrow = c(1,3))
+hist(light)
+boxplot(light, main = "Box plot of light")
+qqnorm(light, main = "Normal Q-Q plot of light")
+qqline(light)
+shapiro.test(light)
+```
+
+#### b)
+
+```{r}
+T1 <- mean(light79)
+T2 <- mean(light82)
+T3 <- mean(light)
+
+conf_interval <- function(light_data, T_val) {
+  B <- 1000
+  Tstar <- numeric(B)
+  for(i in 1:B) {
+    Xstar <- sample(light_data, replace = TRUE)
+    Tstar[i] <- mean(Xstar)
+  }
+  Tstar25 <- quantile(Tstar, 0.025)
+  Tstar975 <- quantile(Tstar, 0.975)
+  return(c(2*T_val - Tstar975, 2*T_val - Tstar25))
+}
+
+light79_int <- conf_interval(light79, T1)
+light82_int <- conf_interval(light82, T2)
+light_int <- conf_interval(light, T3)
+
+cat("Light 79: Interval = ", light79_int, "Mean = ", T1, "\n")
+cat("Light 82: Interval = ", light82_int, "Mean = ", T2, "\n")
+cat("Light: Interval = ", light_int, "Mean = ", T3, "\n")
+```
+
+#### c)
+
+```{r}
+current_c <- 299792 # https://www.space.com/15830-light-speed.html
+# assuming normality for 79 and 82 we can use t-test, for light we need wilcoxon test
+t.test(light79, mu = current_c)
+t.test(light82, mu = current_c)
+wilcox.test(light, mu = current_c)
+```
 
 ## Exercise 3
 ##### a) Make an appropriate plot of this data set. What marketing advice(s) would you give to the marketing manager? Are there any inconsistencies in the data? If so, try to fix these.
@@ -79,7 +152,7 @@ hist(data$Bills,prob=T);
 qqnorm(data$Bills);
 ```
 
-##### b) By using a bootstrap test with the test statistic T = median(X1,...,X200), test whether the data telephone.txt stems from the exponential distribution Exp(λ) with some λ from [0.01, 0.1].
+##### b) By using a bootstrap test with the test statistic T = median(X1,...,X200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
 In order to test lamda from[0.01,0.1],let lamda=seq(0.01,0.1,by=0.01);for every lamda, use bootstrap test.
 ```{r}
 lamda=seq(0.01,0.1,by=0.01);
@@ -121,7 +194,7 @@ sum(Tstar<Tstar25);
 c(2*T1-Tstar975,2*T1-Tstar25);
 ```
 
-##### d) Assuming X1 , . . . Xn ∼ Exp(λ) and using the central limit theorem for the sample mean, estimate λ and construct again a 95% confidence interval for the population median. Comment on your findings.
+##### d) Assuming X1 , . . . Xn ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings.
 Central limit theorem establishes that, in some situations, when independent random variables are added, their properly normalized sum tends toward a normal distribution even if the original variables themselves are not normally distributed. We can set up 1,000 sets of samples, each group sampling 50 data. The mean of 1000 samples is close to the population mean. According to the exponential distribution, mean=1/lamda, so lamda is about 0.022.
 ```{r}
 B=1000;
@@ -166,7 +239,58 @@ binom.test(low,200,p=0.25,alternative="greater",conf.level = 0.9)
 
 
 
-## Exercise 4 
+## Exercise 4
+
+#### a) Disregarding the type of drink, test whether the run times before drink and after are correlated.
+
+```{r}
+run_raw <- read.table("run.txt", header = TRUE)
+before <- run_raw$before
+after = run_raw$after
+cor.test(before, after)
+
+# Check normality assumption
+par(mfrow = c(1,2))
+qqnorm(before, main = "Normal Q-Q plot of runtime before")
+qqline(before)
+qqnorm(after, main = "Normal Q-Q plot runtime after")
+qqline(after)
+```
+
+#### b) Test separately, for both the softdrink and the energy drink conditions, whether there is a differencein speed in the two running tasks.
+
+```{r}
+lemo <- split(run_raw, f = run_raw$drink)["lemo"]
+energy <- split(run_raw, f = run_raw$drink)["energy"]
+
+permutation_test <- function(x, y) {
+  B <- 1000
+  Tstar <- numeric(B)
+  for(i in 1:B) {
+    Xstar <- t(apply(cbind(x, y), 1, sample))
+    Tstar[i] <- mean(Xstar[,1] - Xstar[,2])
+  }
+  t <- mean(x - y)
+  hist(Tstar)
+  p1 <- sum(Tstar < t) / B
+  pr <- sum(Tstar > t) / B
+  p <- 2 * min(p1, pr)
+  return(p)
+}
+
+par(mfrow = c(1,1))
+qqnorm(lemo$lemo$before - lemo$lemo$after, main = "QQ plot of lemo difference")
+qqline(lemo$lemo$before - lemo$lemo$after)
+p_lemo <- permutation_test(lemo$lemo$before, lemo$lemo$after)
+
+par(mfrow = c(1,1))
+qqnorm(energy$energy$before - energy$energy$after, main = "QQ plot of energy difference")
+qqline(energy$energy$before - energy$energy$after)
+p_energy <- permutation_test(energy$energy$before, energy$energy$after)
+```
+
+#### c) For each pupil compute the time difference between the two running tasks. Test whether these time differences are effected by the type of drink.
+#### d) Can you think of a plausible objection to the design of the experiment in b) if the main aim was to test whether drinking the energy drink speeds up the running? Is there a similar objection to the design of the experiment in c)? Comment on all your findings in this exercise.
 
 
 
@@ -213,7 +337,7 @@ The p-value is 0.1085 > 0.05, the chicken weights of meatmeal and sunflower grou
 chickaov=lm(weight ~ feed, data=chickwts)
 anova(chickaov)
 ```
-The p-value of the test is highly significant (p=5.94e−10), therefore we conclude the alternative, that at least one feed type has a different average weight. Hence the type of feed supplement has an effect on the weight of the chicks.
+The p-value of the test is highly significant (p=5.94e-10), therefore we conclude the alternative, that at least one feed type has a different average weight. Hence the type of feed supplement has an effect on the weight of the chicks.
 
 ```{r estimated chick weights}
 library("lattice")
