@@ -1,10 +1,11 @@
 ---
-output:
-  pdf_document: default
-  html_document: default
+  title: "Assignment 1"
+  author: "Andrea Di Dio, Alicia Song, Jiacheng Lu --- Group 22"
+  fontsize: 10pt
+  output:
+    pdf_document: default
+    html_document: default
 ---
-
-# EDDA Assignment 1
 
 ## Exercise 1
 ##### a)
@@ -74,11 +75,10 @@ As in a), we can see that if nu gets closer to 180 which equals mu, the power of
 
 $H_0 : \mu = \mu_0$ (population is normally distributed)
 
-```{r}
+```{r, fig.width=5, fig.height=3}
 light79_raw <- read.delim("./light1879.txt", header = FALSE, sep = "")
 light82_raw <- read.delim("./light1882.txt", header = FALSE, fill = TRUE, sep = "")
 light_raw <- read.delim("./light.txt", header = FALSE, fill = TRUE, sep = "")
-
 light79 <- unlist(na.omit(light79_raw) + 299000, use.name = FALSE)
 light82 <- unlist(na.omit(light82_raw) + 299000, use.name = FALSE)
 light <- unlist((7.442 / ((na.omit(light_raw)/1000) + 24.8) * 1000000), use.names = FALSE)
@@ -86,24 +86,23 @@ light <- unlist((7.442 / ((na.omit(light_raw)/1000) + 24.8) * 1000000), use.name
 par(mfrow = c(1,3))
 hist(light79)
 boxplot(light79, main = "Box plot of light79")
-qqnorm(light79, main = "Normal Q-Q plot of light79")
-qqline(light79)
+qqnorm(light79, main = "Normal Q-Q plot of light79"); qqline(light79)
 shapiro.test(light79)
 
 par(mfrow = c(1,3))
 hist(light82)
 boxplot(light82, main = "Box plot of light82")
-qqnorm(light82, main = "Normal Q-Q plot of light82")
-qqline(light82)
+qqnorm(light82, main = "Normal Q-Q plot of light82"); qqline(light82)
 shapiro.test(light82)
 
 par(mfrow = c(1,3))
 hist(light)
 boxplot(light, main = "Box plot of light")
-qqnorm(light, main = "Normal Q-Q plot of light")
-qqline(light)
+qqnorm(light, main = "Normal Q-Q plot of light"); qqline(light)
 shapiro.test(light)
 ```
+
+Visually, the histogram, boxplots and qq plots of the data sets might suggest that for light79 and light82 the population might be normally distributed. On the other hand, the histogram of light has some significant outliers which cause the QQ plot to show non-normal distribution. In order to assess the normality of these datasets, we have conducted the **Shapiro-Wilk normality test** which shows $p > \alpha$ assuming $\alpha = 0.05$ for the light79 and light82 datasets but $p < \alpha$ for the light dataset. This means that we _fail to reject $H_0$ for light79 and light82, but we can safely reject $H_0$ for light._
 
 #### b)
 
