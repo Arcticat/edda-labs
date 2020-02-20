@@ -3,8 +3,8 @@
   author: "Andrea Di Dio, Chenghan Song, Jiacheng Lu --- Group 22"
   fontsize: 10pt
   output:
-    html_document: default
     pdf_document: default
+    html_document: default
 ---
 
 `r options(digits = 3); options(warn = -1)`
@@ -130,8 +130,8 @@ hist(data$Bills,prob=T,main="histogram of bills");
 
 ##### b)
 
-In order to test lamda from[0.01,0.1],let lamda=seq(0.01,0.1,by=0.01);for every lamda, use bootstrap test, 
-$H_0$: the data stems from the exponential distribution Exp(λ).
+In order to test $\lambda$ from[0.01,0.1],let $\lambda$=seq(0.01,0.1,by=0.01);for every $\lambda$, use bootstrap test, 
+$H_0$: the data stems from the exponential distribution Exp($\lambda$).
 ```{r}
 lamda=seq(0.01,0.1,by=0.01); length(lamda);bills=data$Bills;t=median(bills);B=1000; tstar=numeric(B);
 p=numeric(10); n=length(bills)
@@ -158,7 +158,7 @@ sum(Tstar<Tstar25); c(2*T1-Tstar975,2*T1-Tstar25)
 
 ##### d)
 
-Central limit theorem establishes that when independent random variables are added, their properly normalized sum tends toward a normal distribution. We can set up 1,000 sets of samples, each group sampling 50 data. The mean of 1000 samples is close to the population mean. According to the exponential distribution, mean=1/$lamda$, so $lamda$ is about 0.022.
+Central limit theorem establishes that when independent random variables are added, their properly normalized sum tends toward a normal distribution. We can set up 1,000 sets of samples, each group sampling 50 data. The mean of 1000 samples is close to the population mean. According to the exponential distribution, mean=$1/\lambda$, so $\lambda$ is about 0.022.
 ```{r}
 B=1000; s=numeric(B)
 for(i in 1:B){ sample=sample(bills,50); sample_mean=mean(sample)
@@ -180,7 +180,7 @@ sum(Tstar<Tstar25); c(2*T1-Tstar975,2*T1-Tstar25)
 ##### e)
 
 $H_0$: median bill >= 40 euro. Choose sign test. 
-The result shows p-value = 0.009698, which is smaller than 0.05, so reject H0, the median bill is smaller than 40 euro.
+The result shows p-value = 0.009698, which is smaller than 0.05, so reject $H_0$, the median bill is smaller than 40 euro.
 ```{r}
 binom.test(sum(bills>40),200,al="l");
 ```
@@ -256,7 +256,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##### a)
 
-H0: There is no difference between effects of meatmeal and sunflower supplement on weight.
+$H_0$: There is no difference between effects of meatmeal and sunflower supplement on weight.
 ```{r density, fig.width = 6, fig.height = 3.5}
 data("chickwts")
 meatmealChick <- chickwts$weight[chickwts$feed == 'meatmeal']
@@ -271,7 +271,7 @@ data("chickwts");par(mfrow = c(1,1));
 t.test(meatmealChick, sunflowerChick, var.equal = T)
 ```
 
-p-value = 0.04047 < 0.05, so we reject H0 and conclude that a significant difference does exist, which means the mean chicken weights of meatmeal and sunflower groups are different.
+p-value = 0.04047 < 0.05, so we reject $H_0$ and conclude that a significant difference does exist, which means the mean chicken weights of meatmeal and sunflower groups are different.
 
 It requires both types of weights should be normally distributed and Variances between two groups be equal. According to density plots, the distribution of sunflower is non-normal distribution, so the two-sample t-test is invalid. 
 
@@ -291,7 +291,7 @@ The p-value is 0.1085 > 0.05, the chicken weights of meatmeal and sunflower grou
 ```{r}
 chickaov=lm(weight ~ feed, data=chickwts); anova(chickaov)
 ```
-H0: the type of feed supplement does not have an effect on the weight of the chicks. The p-value of the test is highly significant (p=5.94e-10), therefore we reject H0 and conclude the alternative, that at least one feed type has a different average weight. Hence the type of feed supplement has an effect on the weight of the chicks.
+$H_0$: the type of feed supplement does not have an effect on the weight of the chicks. The p-value of the test is highly significant (p=5.94e-10), therefore we reject $H_0$ and conclude the alternative, that at least one feed type has a different average weight. Hence the type of feed supplement has an effect on the weight of the chicks.
 
 ```{r estimated chick weights, fig.width = 5.5, fig.height = 3.5}
 library("lattice")
@@ -322,8 +322,8 @@ The plots demonstrate that the assumptions of ANOVA were satisfied as the residu
 ```{r}
 kruskal.test(weight ~ feed, data=chickwts) 
 ```
-H0: the type of feed supplement does not have an effect on the weight of the chicks.
+$H_0$: the type of feed supplement does not have an effect on the weight of the chicks.
 
-The command kruskal.test performs the Kruskal-Wallis test and yields a p-value. The p-value for testing H0 is 5.113e-07, hence H0 is rejected. the type of feed supplement has an effect on the weight of the chicks. The one-way ANOVA also yield a significant difference. From the qq plot above,the residuals do not seem to deviate significantly from normal, and both tests could be used here.
+The command kruskal.test performs the Kruskal-Wallis test and yields a p-value. The p-value for testing $H_0$ is 5.113e-07, hence $H_0$ is rejected. the type of feed supplement has an effect on the weight of the chicks. The one-way ANOVA also yield a significant difference. From the qq plot above,the residuals do not seem to deviate significantly from normal, and both tests could be used here.
 
 
