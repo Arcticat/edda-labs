@@ -18,7 +18,7 @@ rbind(rep(1:I,each=N*J),rep(1:J,N*I),sample(1:(N*I*J)))
 ```
 ##### b)
 ```{r}
-breadata=read.table(file="bread.txt",header=TRUE);par(mfrow=c(1,2))
+breadata=read.table(file="bread.txt",header=TRUE);par(mfrow=c(2,2))
 boxplot(hours~environment,data=breadata, main="box plot of hours-environment")
 boxplot(hours~humidity, data=breadata,main="box plot of hours-humidity")
 interaction.plot(breadata$environment,breadata$humidity,breadata$hours, main="interaction plot(humidity fixed)")
@@ -78,6 +78,7 @@ boxplot(search_raw$time ~ search_raw$skill, main = "time VS skill Boxplot")
 boxplot(search_raw$time ~ search_raw$interface, main = "time VS interface Boxplot")
 ```
 ```{r}
+par(mfrow=c(1,2))
 interaction.plot(search_raw$skill, search_raw$interface, search_raw$time, trace.label = "Interface")
 interaction.plot(search_raw$interface, search_raw$skill, search_raw$time, trace.label = "Skill")
 ```
@@ -145,7 +146,7 @@ The resulting p-value is $0.096 > \alpha$ meaning that we fail to reject $H_0$ a
 ```{r}
 cow=read.table(file="cow.txt",header=TRUE)
 cow$id=factor(cow$id); cow$per=factor(cow$per)
-aovcow=lm(milk~treatment+id,data=cow); anova(aovcow)
+aovcow=lm(milk~treatment+id,data=cow);print(anova(aovcow), signif.stars = F)
 par(mfrow=c(1,2));plot(aovcow,1);plot(aovcow,2)
 ```
 
@@ -157,7 +158,7 @@ However, an ordinary "mixed effects" model is not suitable in this case where th
 
 ##### b)
 ```{r}
-cowlm=lm(milk~treatment+per+id,data=cow); anova(cowlm);summary(cowlm)
+cowlm=lm(milk~id+per+treatment,data=cow); print(anova(cowlm), signif.stars = F);summary(cowlm)
 ```
 
 ```{r}
@@ -169,11 +170,7 @@ anova(cowlmer,cowlmer1)
 
 $H_0$: the type of feedingstuffs does not influence milk production
 
-In fixed effects analysis, the p-value for testing $H_0$ is 1.349e-06, thus $H_0$ is rejected, the type of feedingstuffs influences milk production
-
-In mixed effects analysis, the p-value for testing $H_0$ is 0.446, thus we accept $H_0$, the type of feedingstuffs does not influence milk production
-
-The estimated treatment and period effects under fixed effects of mixed effects analysis are identical to those in fixed effects analysis.
+In fixed effects analysis, the p-value for testing $H_0$ is 0.51654, thus we don't reject $H_0$, the type of feedingstuffs does not influence milk production. In mixed effects analysis, the p-value for testing $H_0$ is 0.446, thus we accept $H_0$, the type of feedingstuffs does not influence milk production. The estimated treatment and period effects under fixed effects of mixed effects analysis are identical to those in fixed effects analysis.
 
 ##### c)
 ```{r}
@@ -242,11 +239,10 @@ The p-value for the $\chi^2$-test for contingency tables is `r p_val_chi` which 
 
 ## Exercise 5
 
-The data in expensescrime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.) The variables are: state (indicating the state in the USA), expend (state expenditures on criminal activities in $1000), bad (crime rate per 100000), crime (number of persons under criminal supervision), lawyers (number of lawyers in the state), employ (number of persons employed in the state) and pop (population of the state in 1000). In the regression analysis, take expend as response variable and bad, crime, lawyers, employ and pop as explanatory variables. 
-
-##### a) Make some graphical summaries of the data. Investigate the problem of potential and influence points, and the problem of collinearity. 
+##### a)
 ```{r}
 expensescrime=read.table(file="expensescrime.txt",header=TRUE)
+par(mfrow=c(2,3))
 for (i in c(2,3,4,5,6,7)) hist(expensescrime[,i],main=names(expensescrime[i]))
 plot(expensescrime[,c(2,3,4,5,6,7)])
 par(mfrow=c(2,3))
@@ -255,11 +251,6 @@ From the plot we can find potential points for each variable. For bad:336.2(CA) 
 
 ```{r}
 expensescrimelm=lm(expend~bad+crime+lawyers+employ+pop,data=expensescrime)
-expendbadlm=lm(expend~bad,data=expensescrime)
-expendcrimelm=lm(expend~crime,data=expensescrime)
-expendlawyerslm=lm(expend~lawyers,data=expensescrime)
-expendemploylm=lm(expend~employ,data=expensescrime)
-expendpoplm=lm(expend~pop,data=expensescrime)
 round(cooks.distance(expensescrimelm),2)
 plot(cooks.distance(expensescrimelm),type="b",main="Cook's distances")
 ```
@@ -269,13 +260,12 @@ For influence points, we check the Cook's distance, from the plot we can see tha
 library(car)
 vif(expensescrimelm)
 round(cor(expensescrime[,c(3,4,5,6,7)]),2)
-pairs(expensescrime[,c(3,4,5,6,7)])
+
 
 ```
 From both the scatter plot and pairwise linear correlation and the vif, bad and pop (correlation value=0.92), lawyers and employ (correlation value=0.97), lawyers and pop(correlation value=0.93), employ and pop (correlation value=0.97), so crime and  lawyers and employ and pop are collinear.
 
-
-##### b) Fit a linear regression model to the data. Use both the step-up and the step-down method to find the best model. If step-up and step-down yield two different models, choose one and motivate your choice.
+##### b) 
 
 First, in the step-up method, we starts with fitting all p possible simple linear regression models:
 $Y_{n}=\beta_{0}+\beta{1}X_{nj}+e_{n}$
@@ -304,29 +294,29 @@ summary(lm(expend~lawyers+employ,data=expensescrime))[8]
 ```
 In the step-down method, we remove variables whose p-value is larger than 0.05, we stop after remove bad because remaining variables are significant. the model is the same as the model of step-up model.
 
-##### c) Check the model assumptions by using relevant diagnostic  tools.
+##### c) 
+
 The model is $expend=-110.7+0.02971*employ+0.02686*lawyers$.
 ```{r}
-employ=expensescrime$employ
-expend=expensescrime$expend
-lawyers=expensescrime$lawyers
-expendemploylawyerslm=lm(expend~employ+lawyers)
-plot(residuals(expendemploylawyerslm),employ,main="plot of residuals against employ")
-plot(residuals(expendemploylawyerslm),lawyers,main="plot of residuals against lawyers")
-x=residuals(lm(employ+lawyers~expensescrime$bad+expensescrime$crime+expensescrime$pop))
-y=residuals(lm(expend~expensescrime$bad+expensescrime$crime+expensescrime$pop))
+expendemploylawyerslm=lm(expend~employ+lawyers,data=expensescrime)
+par(mfrow=c(3,3))
+plot(residuals(expendemploylawyerslm),expensescrime$employemploy,main="plot of residuals against employ")
+plot(residuals(expendemploylawyerslm),expensescrime$lawyers,main="plot of residuals against lawyers")
+x=residuals(lm(expensescrime$employ+expensescrime$lawyers~expensescrime$bad+expensescrime$crime+expensescrime$pop))
+y=residuals(lm(expensescrime$expend~expensescrime$bad+expensescrime$crime+expensescrime$pop))
 plot(x,y,main="Added variable plot for employ+lawyers")
 plot(residuals(expendemploylawyerslm),expensescrime$bad,main="plot of residuals against bad")
 plot(residuals(expendemploylawyerslm),expensescrime$crime,main="plot of residuals against crime")
 plot(residuals(expendemploylawyerslm),expensescrime$pop,main="plot of residuals against pop")
-plot(residuals(expendemploylawyerslm),expend,main="plot of residuals against expend")
+plot(residuals(expendemploylawyerslm),expensescrime$expend,main="plot of residuals against expend")
 plot(fitted(expendemploylawyerslm),residuals(expendemploylawyerslm))
 qqnorm(residuals(expendemploylawyerslm))
 ```
-From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution.  JHowever, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.
-The model is $expend=-116.7+0.046811*employ$.
+From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution.  JHowever, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.(Only parts of the summary are shown).
+The better model is $expend=-116.7+0.046811*employ$.
 ```{r}
+library(car)
 vif(expendemploylawyerslm)
 summary(lm(expend~lawyers,data=expensescrime))[8]
-summary(lm(expend~employ,data=expensescrime))
+summary(lm(expend~employ,data=expensescrime))[8]
 ```
