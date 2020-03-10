@@ -17,10 +17,10 @@ I=3; J=2; N=3
 rbind(rep(1:I,each=N*J),rep(1:J,N*I),sample(1:(N*I*J)))
 ```
 ##### b)
-```{r}
-breadata=read.table(file="bread.txt",header=TRUE);par(mfrow=c(2,2))
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
+breadata=read.table(file="bread.txt",header=TRUE);par(mfrow=c(1,2))
 boxplot(hours~environment,data=breadata, main="box plot of hours-environment")
-boxplot(hours~humidity, data=breadata,main="box plot of hours-humidity")
+boxplot(hours~humidity, data=breadata,main="box plot of hours-humidity"); par(mfrow = c(1,2))
 interaction.plot(breadata$environment,breadata$humidity,breadata$hours, main="interaction plot(humidity fixed)")
 interaction.plot(breadata$humidity,breadata$environment,breadata$hours, main="interaction plot(environment fixed)")
 ```
@@ -51,7 +51,7 @@ $H_0$ for the interaction of warm environment and wet humidity: there is no inte
 This is not a good question. Because the interaction effects between two factors are significant. We can not compare the influence of the first and second factor when there are interactions between them.
 
 ##### e)
-```{r}
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
 par(mfrow=c(1,2));qqnorm(residuals(breadaov), main="QQ-plot residuals"); plot(fitted(breadaov),residuals(breadaov), main="residuals VS fitted values")
 ```
 
@@ -99,8 +99,7 @@ print(anova(search_aov), signif.stars = F)
 The p-value $0.013 < \alpha$ meaning that we can safely reject $H_0$ concluding that the interfaces used affect the search time.
 
 ```{r}
-contrasts(search_raw$interface) <- contr.sum
-contrasts(search_raw$skill) <- contr.sum
+contrasts(search_raw$interface) <- contr.sum; contrasts(search_raw$skill) <- contr.sum
 search_aov2 <- lm(search_raw$time  ~ search_raw$interface + search_raw$skill)
 summary(search_aov2)
 ```
@@ -108,11 +107,14 @@ summary(search_aov2)
 To estimate the time taken by a student with skill level 3 to complete the search task using interface 2, we should sum the intercept term with the coefficients of _skill3_ and _interface2_ $20.5467 + (-0.1133) + 0.3133 = 20.7467$.
 
 #### d)
-```{r, fig.width = 6, fig.height = 3.5}
+```{r, include = FALSE}
 options(digits = 6)
+```
+
+```{r, fig.width = 6, fig.height = 3.5}
 qqnorm(residuals(search_aov));qqline(residuals(search_aov))
 plot(fitted(search_aov), residuals(search_aov))
-print(shapiro.test(residuals(search_aov))) # fail to reject H0, might be normal
+print(shapiro.test(residuals(search_aov)))
 ```
 
 The _QQ plot_ of the residuals for the data shows that the data might seem to be normally distributed and this is also confirmed by the **Shapiro-Wilk test** which shows a p-value of 0.282. The plot which shows the fitted values VS the residuals show that there is no systematic change in the residuals based on the fitted values as the points are well-spread out, suggesting that the two populations have equal variances.
@@ -143,7 +145,7 @@ The resulting p-value is $0.096 > \alpha$ meaning that we fail to reject $H_0$ a
 
 ## Exercise 3
 ##### a)
-```{r}
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
 cow=read.table(file="cow.txt",header=TRUE)
 cow$id=factor(cow$id); cow$per=factor(cow$per)
 aovcow=lm(milk~treatment+id,data=cow);print(anova(aovcow), signif.stars = F)
@@ -158,12 +160,15 @@ However, an ordinary "mixed effects" model is not suitable in this case where th
 
 ##### b)
 ```{r}
-cowlm=lm(milk~id+per+treatment,data=cow); print(anova(cowlm), signif.stars = F);summary(cowlm)
+cowlm=lm(milk~id+per+treatment,data=cow); print(anova(cowlm), signif.stars = F)
+```
+
+```{r, include = FALSE}
+library("lme4")
 ```
 
 ```{r}
-library("lme4")
-cowlmer=lmer(milk~treatment+order+per+(1|id),REML=FALSE, data = cow);summary(cowlmer)
+cowlmer=lmer(milk~treatment+order+per+(1|id),REML=FALSE, data = cow)
 cowlmer1 = lmer(milk~order+per+(1|id),REML=FALSE, data = cow)
 anova(cowlmer,cowlmer1)
 ```
@@ -230,7 +235,6 @@ options(digits = 3)
 ```
 
 ```{r}
-
 p_val_chi <- chisq.test(xtabs(~nausea_frame$medicin + nausea_frame$naus))[[3]]
 ```
 
@@ -249,15 +253,17 @@ par(mfrow=c(2,3))
 ```
 From the plot we can find potential points for each variable. For bad:336.2(CA) & 370.1(TX); For lawyers:82001(CA)&72575(NY);For employ: 118149(CA) & 111518(NY); For pop: 27663(CA).
 
-```{r}
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
 expensescrimelm=lm(expend~bad+crime+lawyers+employ+pop,data=expensescrime)
 round(cooks.distance(expensescrimelm),2)
 plot(cooks.distance(expensescrimelm),type="b",main="Cook's distances")
 ```
 For influence points, we check the Cook's distance, from the plot we can see that there are four. No.5(CA) & No.8(DC) & No.35(NY) & No.44(TX).
 
-```{r}
+```{r, include = FALSE}
 library(car)
+```
+```{r}
 vif(expensescrimelm)
 round(cor(expensescrime[,c(3,4,5,6,7)]),2)
 
@@ -299,6 +305,8 @@ In the step-down method, we remove variables whose p-value is larger than 0.05, 
 The model is $expend=-110.7+0.02971*employ+0.02686*lawyers$.
 ```{r}
 expendemploylawyerslm=lm(expend~employ+lawyers,data=expensescrime)
+```
+```{r, echo = FALSE}
 par(mfrow=c(3,3))
 plot(residuals(expendemploylawyerslm),expensescrime$employemploy,main="plot of residuals against employ")
 plot(residuals(expendemploylawyerslm),expensescrime$lawyers,main="plot of residuals against lawyers")
@@ -309,10 +317,10 @@ plot(residuals(expendemploylawyerslm),expensescrime$bad,main="plot of residuals 
 plot(residuals(expendemploylawyerslm),expensescrime$crime,main="plot of residuals against crime")
 plot(residuals(expendemploylawyerslm),expensescrime$pop,main="plot of residuals against pop")
 plot(residuals(expendemploylawyerslm),expensescrime$expend,main="plot of residuals against expend")
-plot(fitted(expendemploylawyerslm),residuals(expendemploylawyerslm))
-qqnorm(residuals(expendemploylawyerslm))
+plot(fitted(expendemploylawyerslm),residuals(expendemploylawyerslm), main = "plot of fitted VS residuals")
+qqnorm(residuals(expendemploylawyerslm), main = "QQ plot of residuals")
 ```
-From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution.  JHowever, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.(Only parts of the summary are shown).
+From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution. However, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.(Only parts of the summary are shown).
 The better model is $expend=-116.7+0.046811*employ$.
 ```{r}
 library(car)
