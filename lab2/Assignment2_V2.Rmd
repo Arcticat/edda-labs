@@ -3,8 +3,8 @@
   author: "Andrea Di Dio, Chenghan Song, Jiacheng Lu --- Group 22"
   fontsize: 10pt
   output:
-    html_document: default
     pdf_document: default
+    html_document: default
 ---
 
 `r options(digits = 3); options(warn = -1)`
@@ -162,9 +162,11 @@ However, an ordinary "mixed effects" model is not suitable in this case where th
 ```{r}
 cowlm=lm(milk~id+per+treatment,data=cow); print(anova(cowlm), signif.stars = F);summary(cowlm)[4]
 ```
-
-```{r}
+```{r, include = FALSE}
 library("lme4")
+```
+```{r}
+
 cowlmer=lmer(milk~treatment+order+per+(1|id),REML=FALSE, data = cow);summary(cowlmer)[10]
 cowlmer1 = lmer(milk~order+per+(1|id),REML=FALSE, data = cow)
 anova(cowlmer,cowlmer1)
@@ -241,7 +243,7 @@ The p-value for the $\chi^2$-test for contingency tables is `r p_val_chi` which 
 ## Exercise 5
 
 ##### a)
-```{r}
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
 expensescrime=read.table(file="expensescrime.txt",header=TRUE)
 par(mfrow=c(2,3))
 for (i in c(2,3,4,5,6,7)) hist(expensescrime[,i],main=names(expensescrime[i]))
@@ -263,8 +265,6 @@ library(car)
 ```{r}
 vif(expensescrimelm)
 round(cor(expensescrime[,c(3,4,5,6,7)]),2)
-
-
 ```
 From both the scatter plot and pairwise linear correlation and the vif, bad and pop (correlation value=0.92), lawyers and employ (correlation value=0.97), lawyers and pop(correlation value=0.93), employ and pop (correlation value=0.97), so crime and  lawyers and employ and pop are collinear.
 
@@ -320,7 +320,6 @@ qqnorm(residuals(expendemploylawyerslm), main = "QQ plot of residuals")
 From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution. However, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.(Only parts of the summary are shown).
 The better model is $expend=-116.7+0.046811*employ$.
 ```{r}
-library(car)
 vif(expendemploylawyerslm)
 summary(lm(expend~lawyers,data=expensescrime))[8]
 summary(lm(expend~employ,data=expensescrime))[8]
