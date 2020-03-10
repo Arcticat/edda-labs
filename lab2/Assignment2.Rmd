@@ -1,0 +1,332 @@
+---
+  title: "Assignment 2"
+  author: "Andrea Di Dio, Chenghan Song, Jiacheng Lu --- Group 22"
+  fontsize: 10pt
+  output:
+    pdf_document: default
+    html_document: default
+---
+
+`r options(digits = 3); options(warn = -1)`
+
+## Exercise 1
+##### a)
+We assign combine levels ($i$,$j$) of the factors to a random set of N units
+```{r}
+I=3; J=2; N=3
+rbind(rep(1:I,each=N*J),rep(1:J,N*I),sample(1:(N*I*J)))
+```
+##### b)
+```{r}
+breadata=read.table(file="bread.txt",header=TRUE);par(mfrow=c(1,2))
+boxplot(hours~environment,data=breadata, main="box plot of hours-environment")
+boxplot(hours~humidity, data=breadata,main="box plot of hours-humidity")
+interaction.plot(breadata$environment,breadata$humidity,breadata$hours, main="interaction plot(humidity fixed)")
+interaction.plot(breadata$humidity,breadata$environment,breadata$hours, main="interaction plot(environment fixed)")
+```
+
+The lines in the interaction plots are unparallel, thus we can assume that there are interactions between temperature and humidity. 
+
+##### c)
+```{r}
+breadaov=lm(hours~environment*humidity, data = breadata); anova(breadaov)
+```
+$H_0$:$\alpha_i$ = 0 for all $i$: The temperature does not have a main effect on the time of decay
+
+$H_0$: $\beta_j$ = 0 for all $j$: The humidity does not have a main effect on the time of decay
+
+$H_0$: $\gamma_{ij}$ = 0 for all ($i$, $j$): Temperature and humidity do not have interaction effects on the time of decay
+
+The p-value for testing $H_0$:$\alpha_i$ = 0 for all $i$ is 2.461e-10, hence $H_0$ is rejected; for $H_0$: $\beta_j$ = 0 for all $j$ is 4.316e-06, hence $H_0$ is rejected; for $H_0$: $\gamma_{ij}$ = 0 for all ($i$, $j$) is 3.705e-07, hence $H_0$ is rejected. So both temperature and humidity have main effects and there are also interactions between two factors.
+
+```{r}
+summary(breadaov)
+```
+
+$H_0$ for the interaction of intermediate environment and wet humidity: there is no interaction effect of intermediate environment and wet humidity. The p-value is 7.23e-06, therefore we reject $H_0$ and conclude that there is a significant interaction between intermediate temperature and wet humidity.
+
+$H_0$ for the interaction of warm environment and wet humidity: there is no interaction effect of warm environment and wet humidity. The p-value is 1.07e-07, therefore we reject $H_0$ and conclude that there is a significant interaction between warm temperature and wet humidity.
+
+##### d)
+This is not a good question. Because the interaction effects between two factors are significant. We can not compare the influence of the first and second factor when there are interactions between them.
+
+##### e)
+```{r}
+par(mfrow=c(1,2));qqnorm(residuals(breadaov), main="QQ-plot residuals"); plot(fitted(breadaov),residuals(breadaov), main="residuals VS fitted values")
+```
+
+From the QQ-Plot we can see that the residuals are not normally distributed. 
+
+The spread in the residuals seems to be bigger for some certain fitted values. Due to the spread in the residuals should not change systematically with any variable, in particular not with the fitted values, there might be some outliers.
+
+## Exercise 2
+#### a)
+
+For the _randomized block design_, we perform the experiment with 5 blocks (`B`) using 3 interfaces (`I`) and have one replicate per treatment level per block (`N`).
+
+```{r}
+search_raw <- read.delim("./search.txt", header = TRUE, sep = "")
+I <- 3; B <- 5; N <- 1;
+for(i in 1:B) print(sample(1:(N * I)))
+```
+
+
+#### b)
+```{r, compress = T, fig.width = 6, fig.height = 3.5}
+par(mfrow = c(1,2))
+boxplot(search_raw$time ~ search_raw$skill, main = "time VS skill Boxplot")
+boxplot(search_raw$time ~ search_raw$interface, main = "time VS interface Boxplot")
+```
+```{r}
+interaction.plot(search_raw$skill, search_raw$interface, search_raw$time, trace.label = "Interface")
+interaction.plot(search_raw$interface, search_raw$skill, search_raw$time, trace.label = "Skill")
+```
+
+We have used two different graphical summaries in order to investigate the interaction between the interfaces and skill of the students on the time taken to complete the task. The boxplots show that both factors (_skill_ and _interface_) affect the dependent variable (_time_). The lower the value of the skill factor (and hence the higher the competence of the student) result in lower times to complete the task. Also the interface factor seems to result in a difference of time taken to complete the task. This shows that there exists a dependence of the dependent variable on the factors of interest. The interaction plots show that the lines plotted are not parallel to one another, implying a significant interaction between the skill and the interface used to complete the task.
+
+
+#### c)
+$H_0:$ The search time is the same for all the interfaces (There is no interaction between the factors).\newline
+Given that our $H_0$ says that there is no interactions, we test using the additive model:
+```{r}
+search_raw$skill <- as.factor(search_raw$skill)
+search_raw$interface <- as.factor(search_raw$interface)
+search_aov <- lm(search_raw$time ~ search_raw$skill + search_raw$interface, data = search_raw)
+print(anova(search_aov), signif.stars = F)
+```
+
+The p-value $0.013 < \alpha$ meaning that we can safely reject $H_0$ concluding that the interfaces used affect the search time.
+
+```{r}
+contrasts(search_raw$interface) <- contr.sum
+contrasts(search_raw$skill) <- contr.sum
+search_aov2 <- lm(search_raw$time  ~ search_raw$interface + search_raw$skill)
+summary(search_aov2)
+```
+
+To estimate the time taken by a student with skill level 3 to complete the search task using interface 2, we should sum the intercept term with the coefficients of _skill3_ and _interface2_ $20.5467 + (-0.1133) + 0.3133 = 20.7467$.
+
+#### d)
+```{r, fig.width = 6, fig.height = 3.5}
+options(digits = 6)
+qqnorm(residuals(search_aov));qqline(residuals(search_aov))
+plot(fitted(search_aov), residuals(search_aov))
+print(shapiro.test(residuals(search_aov))) # fail to reject H0, might be normal
+```
+
+The _QQ plot_ of the residuals for the data shows that the data might seem to be normally distributed and this is also confirmed by the **Shapiro-Wilk test** which shows a p-value of 0.282. The plot which shows the fitted values VS the residuals show that there is no systematic change in the residuals based on the fitted values as the points are well-spread out, suggesting that the two populations have equal variances.
+
+
+#### e)
+
+$H_0:$ There is no effect in the interface used on the search time.
+
+```{r}
+options(digits = 5)
+friedman.test(search_raw$time, search_raw$interface, search_raw$skill)
+```
+
+The non-parametric Friedman test gives a p-value of $0.041 < \alpha$ meaning that we can safely reject $H_0$ meaning that the choice in the interface used for the search engine has a statistically significant effect on the search time.
+
+
+#### f)
+
+$H_0:$ The interface used does not affect the search time.
+
+```{r}
+search_aov_one_way <- lm(search_raw$time ~ search_raw$interface, data = search_raw)
+print(anova(search_aov_one_way), signif.stars = F)
+```
+
+The resulting p-value is $0.096 > \alpha$ meaning that we fail to reject $H_0$ and hence could be possible that the interfaces have no effect on the search time. However, given that the testing in part `b)` suggest that there is interaction between the skill and the interface factors, this test is not useful and wrong. In order for this test to be valid, we must assume no interaction between the two factors on the dependent variable, but this is not the case meaning that this test is not statistically meaningful.
+
+## Exercise 3
+##### a)
+```{r}
+cow=read.table(file="cow.txt",header=TRUE)
+cow$id=factor(cow$id); cow$per=factor(cow$per)
+aovcow=lm(milk~treatment+id,data=cow); anova(aovcow)
+par(mfrow=c(1,2));plot(aovcow,1);plot(aovcow,2)
+```
+
+$H_0$: the type of feedingstuffs does not influence milk production
+
+The p-value for testing $H_0$ is 0.8281, thus we fail to reject $H_0$, the type of feedingstuffs does not have an effect on milk production. From the plot above, the residuals do not seem to deviate significantly from normal.
+
+However, an ordinary "mixed effects" model is not suitable in this case where the assumption of "exchangebility" may fail. Cows may be happy with or bored at feedingstuff, then a block design is invalid.
+
+##### b)
+```{r}
+cowlm=lm(milk~treatment+per+id,data=cow); anova(cowlm);summary(cowlm)
+```
+
+```{r}
+library("lme4")
+cowlmer=lmer(milk~treatment+order+per+(1|id),REML=FALSE, data = cow);summary(cowlmer)
+cowlmer1 = lmer(milk~order+per+(1|id),REML=FALSE, data = cow)
+anova(cowlmer,cowlmer1)
+```
+
+$H_0$: the type of feedingstuffs does not influence milk production
+
+In fixed effects analysis, the p-value for testing $H_0$ is 1.349e-06, thus $H_0$ is rejected, the type of feedingstuffs influences milk production
+
+In mixed effects analysis, the p-value for testing $H_0$ is 0.446, thus we accept $H_0$, the type of feedingstuffs does not influence milk production
+
+The estimated treatment and period effects under fixed effects of mixed effects analysis are identical to those in fixed effects analysis.
+
+##### c)
+```{r}
+attach(cow)
+t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
+```
+
+The paired-sample t-test produces a invalid test for a difference in milk production, because repeated measures may not be exchangeable because of time effect: Cows may mature or get older and learning effect: Cows may be happy with or bored at feedingstuff.
+
+The p-value for treatment is identical to the one of the previous "fixed effects" obtained in a) (the order of the treatments was ignored). They are compatible because in the case of two repeated measurements, $t^2$ value for paired t-test is identical to the $F$ value of the repeated measures ANOVA.
+
+## Exercise 4
+
+#### a)
+
+```{r}
+nausea_raw <- read.delim("./nauseatable.txt", header = TRUE, sep = "")
+med_vec <- c();nausea_vec <- c()
+
+for(i in 1:3) { med_name <- rownames(nausea_raw)[i]
+  for(j in 1:2) { nausea <- colnames(nausea_raw)[j]
+    for(k in 1:nausea_raw[,j][i]) { med_vec <- append(med_vec, med_name)
+      if(j == 1) { nausea_vec <- append(nausea_vec, "no")} 
+      else if(j == 2){ nausea_vec <- append(nausea_vec, "yes")}
+    }
+  }
+}
+nausea_frame <- data.frame(medicin = med_vec, naus = nausea_vec)
+xtabs(~nausea_frame$medicin + nausea_frame$naus)
+```
+
+#### b)
+
+$H_0:$ There is no difference between the treatment with different medicines (populations are the same).
+
+```{r}
+permutation_test <- function() {
+  B <- 1000; Tstar <- numeric(B)
+  for(i in 1:B) { Xstar <- sample(nausea_frame$medicin)
+    Tstar[i] <- chisq.test(xtabs(~Xstar + nausea_frame$naus))[[1]]}
+  t <- chisq.test(xtabs(~nausea_frame$medicin + nausea_frame$naus))[[1]]
+  p1 <- sum(Tstar < t) / B; pr <- sum(Tstar > t) / B
+  p <- 2 * min(pr, p1)
+  return(p)
+}
+
+p_val <- permutation_test()
+```
+
+The p-value resulting from the permutation test `r p_val` $> \alpha$ meaning that we fail to reject $H_0$ and thus could mean that the two medicines perform equally well to treat nausea. However, it must be said that in a permutation test, the p-value can change depending on the randomly generated samples meaning that a p-value which is just above the significance level, might be lower than the significance level on a different run.
+
+#### c)
+
+$H_0:$ There is no difference between the treatment with different medicines (populations are the same).
+```{r, echo = FALSE}
+options(digits = 3)
+```
+
+```{r}
+
+p_val_chi <- chisq.test(xtabs(~nausea_frame$medicin + nausea_frame$naus))[[3]]
+```
+
+
+The p-value for the $\chi^2$-test for contingency tables is `r p_val_chi` which is lower than that computed in part b) and is, in fact less than trhe significance value $\alpha$ meaning that we can safely reject $H_0$ suggesting that the different medicines are not equally as good in treating nausea in patients. This could be due to the $\chi^2$ T-values sampled in the permutation test being slightly different from the true $\chi$-distribution.
+
+## Exercise 5
+
+The data in expensescrime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.) The variables are: state (indicating the state in the USA), expend (state expenditures on criminal activities in $1000), bad (crime rate per 100000), crime (number of persons under criminal supervision), lawyers (number of lawyers in the state), employ (number of persons employed in the state) and pop (population of the state in 1000). In the regression analysis, take expend as response variable and bad, crime, lawyers, employ and pop as explanatory variables. 
+
+##### a) Make some graphical summaries of the data. Investigate the problem of potential and influence points, and the problem of collinearity. 
+```{r}
+expensescrime=read.table(file="expensescrime.txt",header=TRUE)
+for (i in c(2,3,4,5,6,7)) hist(expensescrime[,i],main=names(expensescrime[i]))
+plot(expensescrime[,c(2,3,4,5,6,7)])
+par(mfrow=c(2,3))
+```
+From the plot we can find potential points for each variable. For bad:336.2(CA) & 370.1(TX); For lawyers:82001(CA)&72575(NY);For employ: 118149(CA) & 111518(NY); For pop: 27663(CA).
+
+```{r}
+expensescrimelm=lm(expend~bad+crime+lawyers+employ+pop,data=expensescrime)
+expendbadlm=lm(expend~bad,data=expensescrime)
+expendcrimelm=lm(expend~crime,data=expensescrime)
+expendlawyerslm=lm(expend~lawyers,data=expensescrime)
+expendemploylm=lm(expend~employ,data=expensescrime)
+expendpoplm=lm(expend~pop,data=expensescrime)
+round(cooks.distance(expensescrimelm),2)
+plot(cooks.distance(expensescrimelm),type="b",main="Cook's distances")
+```
+For influence points, we check the Cook's distance, from the plot we can see that there are four. No.5(CA) & No.8(DC) & No.35(NY) & No.44(TX).
+
+```{r}
+library(car)
+vif(expensescrimelm)
+round(cor(expensescrime[,c(3,4,5,6,7)]),2)
+pairs(expensescrime[,c(3,4,5,6,7)])
+
+```
+From both the scatter plot and pairwise linear correlation and the vif, bad and pop (correlation value=0.92), lawyers and employ (correlation value=0.97), lawyers and pop(correlation value=0.93), employ and pop (correlation value=0.97), so crime and  lawyers and employ and pop are collinear.
+
+
+##### b) Fit a linear regression model to the data. Use both the step-up and the step-down method to find the best model. If step-up and step-down yield two different models, choose one and motivate your choice.
+
+First, in the step-up method, we starts with fitting all p possible simple linear regression models:
+$Y_{n}=\beta_{0}+\beta{1}X_{nj}+e_{n}$
+To save pages, Only parts of summary are shown.
+```{r}
+summary(lm(expend~bad,data=expensescrime))[8]
+summary(lm(expend~crime,data=expensescrime))[8]
+summary(lm(expend~lawyers,data=expensescrime))[8]
+summary(lm(expend~employ,data=expensescrime))[8]
+summary(lm(expend~pop,data=expensescrime))[8]
+```
+The employ yields the highest $R^{2}$ increase.
+```{r}
+summary(lm(expend~employ+bad,data=expensescrime))[8]
+summary(lm(expend~employ+crime,data=expensescrime))[8]
+summary(lm(expend~employ+lawyers,data=expensescrime))[8]
+summary(lm(expend~employ+pop,data=expensescrime))[8]
+```
+Adding bad or crime or pop yields insignificant explanatory varibles. Therefore stop. The resulting model of the step-up method is $expend=-110.7+0.02971*employ+0.02686*lawyers$.
+
+```{r}
+summary(lm(expend~bad+crime+lawyers+employ+pop,data=expensescrime))[8]
+summary(lm(expend~bad+lawyers+employ+pop,data=expensescrime))[8]
+summary(lm(expend~bad+lawyers+employ,data=expensescrime))[8]
+summary(lm(expend~lawyers+employ,data=expensescrime))[8]
+```
+In the step-down method, we remove variables whose p-value is larger than 0.05, we stop after remove bad because remaining variables are significant. the model is the same as the model of step-up model.
+
+##### c) Check the model assumptions by using relevant diagnostic  tools.
+The model is $expend=-110.7+0.02971*employ+0.02686*lawyers$.
+```{r}
+employ=expensescrime$employ
+expend=expensescrime$expend
+lawyers=expensescrime$lawyers
+expendemploylawyerslm=lm(expend~employ+lawyers)
+plot(residuals(expendemploylawyerslm),employ,main="plot of residuals against employ")
+plot(residuals(expendemploylawyerslm),lawyers,main="plot of residuals against lawyers")
+x=residuals(lm(employ+lawyers~expensescrime$bad+expensescrime$crime+expensescrime$pop))
+y=residuals(lm(expend~expensescrime$bad+expensescrime$crime+expensescrime$pop))
+plot(x,y,main="Added variable plot for employ+lawyers")
+plot(residuals(expendemploylawyerslm),expensescrime$bad,main="plot of residuals against bad")
+plot(residuals(expendemploylawyerslm),expensescrime$crime,main="plot of residuals against crime")
+plot(residuals(expendemploylawyerslm),expensescrime$pop,main="plot of residuals against pop")
+plot(residuals(expendemploylawyerslm),expend,main="plot of residuals against expend")
+plot(fitted(expendemploylawyerslm),residuals(expendemploylawyerslm))
+qqnorm(residuals(expendemploylawyerslm))
+```
+From the above plots we can see that spread of the residuals against employ and the residuals against lawyers are alike. The normal  Q-Q plot of residuals doesn't show normal distribution.  JHowever, plot residuals against Y shows some pattern of decrease. From a), we already know that there is a problem of collinearity between lawyers and employ. Compare with other models, expend~employ has less variables and only a slightly lower value of R-squared.
+The model is $expend=-116.7+0.046811*employ$.
+```{r}
+vif(expendemploylawyerslm)
+summary(lm(expend~lawyers,data=expensescrime))[8]
+summary(lm(expend~employ,data=expensescrime))
+```
