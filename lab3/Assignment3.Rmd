@@ -1,0 +1,97 @@
+---
+  title: "Assignment 3"
+  author: "Andrea Di Dio, Chenghan Song, Jiacheng Lu --- Group 22"
+  fontsize: 10pt
+  output:
+    pdf_document: default
+    html_document: default
+---
+
+## Exercise 2
+
+#### a)
+
+```{r}
+psi_raw <- read.delim("./psi.txt", header = TRUE, sep = "")
+psi_yes <- psi_raw[which(psi_raw$psi == 1),]
+psi_no <- psi_raw[which(psi_raw$psi == 0),]
+passed <- psi_raw[which(psi_raw$passed == 1),]
+not_passed <- psi_raw[which(psi_raw$passed == 0),]
+boxplot(psi_raw$gpa, passed$gpa, not_passed$gpa, names = c("GPA","GPA of passed","GPA of not passed"),
+        main = "Boxplot to compare GPAs (passed/not passed)")
+```
+
+The boxplot above shows the comparison among the total GPA of the students, the GPA for the students who passed the assignments and the GPA for the students that did not pass the assignment. The boxplot shows that the median GPA of the students who passed the assignment is higher than that of the students who didn't pass regardless of the teaching method. This could mean that the GPA of a student is a significant factor to the outcome of an assignment for the students.
+
+```{r}
+boxplot(psi_raw$gpa, psi_yes$gpa, psi_no$gpa, names = c("GPA", "GPA of psi", "GPA of no-psi"),
+        main = "Boxplot to compare GPAs (with/without psi)")
+```
+
+The boxplot above shows the comparison among the total GPA of the students, the GPA for the students who were taught using _psi_ and the GPA for the students who were taught using the traditional method. It shows that the median GPA of a student who has been taught with _psi_ is marginally higher than that of the students who were taught using the traditional method. This could mean that the teaching method does not necessarily influence the GPA for a student.
+
+```{r}
+par(mfrow = c(1,3))
+qqnorm(psi_raw$gpa, main = "QQ plot of GPA");qqline(psi_raw$gpa)
+qqnorm(psi_yes$gpa, main = "QQ plot of GPA (psi)");qqline(psi_yes$gpa)
+qqnorm(psi_no$gpa, main = "QQ plot of GPA (no psi)");qqline(psi_no$gpa)
+```
+
+The QQ-plots above compare the population distribution of the GPA among all students, the students who received _psi_ and the students who were taught using the traditional method. The only QQ-plot which might indicate normality of the population is the one showing the GPA for the students who have been taught with the _psi_ method whilst the other two plots don't seem to be sampled from a normal distribution. This might be a problem given that the sample population of the data for students taught with _psi_ and those taught with the traditional method seems to be different making the experiment less fair or significant.
+
+```{r}
+psi_passed_tab <- xtabs(~psi_raw$passed + psi_raw$psi)
+rownames(psi_passed_tab) <- c("Passed", "Not Passed")
+colnames(psi_passed_tab) <- c("No psi", "psi")
+ftable(psi_passed_tab)
+```
+
+The contingency table above shows that the teaching method might have an influence (ignoring that students might have been sampled from different populations) on whether a students passes the assignment or not. Most students who have not been taught with _psi_ have not passed the assignment, and the students who have been treated with _psi_ have passed the assignment in a higher number than students who have been taught with the traditional method.
+
+#### b)
+
+$H_0:$ Using _psi_ does not affect whether a student passes the assignment or not.
+
+```{r}
+psi_glm <- glm(psi_raw$passed ~ psi_raw$psi + psi_raw$gpa, family = binomial)
+print(summary(psi_glm)$coefficients)
+```
+
+The p-value for _psi_ is $0.025 < \alpha$ meaning that we can safely reject $H_0$ concluding that the _psi_ usage has an effect on the student's ability to pass the assignment. In addition, the positive sign for the parameter estimate for _psi_ ($= 2.338$) also means that when _psi_ is used, the linear predictor is increased by the parameter estimate, increasing the odds of passing the assignment by $e^{2.338} = 10.36$.
+
+#### c)
+
+In order to estimate the probabilities, we assume the model $Pr(Y = 1) = \Psi(\mu + \alpha + \beta X)$ and by extrapolating the coefficients from the summary in _b)_ we can use the logistic function $\Psi(x) = \frac{1}{1 + e^{-x}}$.\newline
+
+To find the probability that a student passes the assignment if it has **received** _psi_ and a gpa of 3 we use:
+
+$x = -11.602 + (2.338 * 1) + (3.063 * 3) \rightarrow x = -0.075 \rightarrow p = \frac{1}{1 + e^{0.075}} = 0.481$
+
+To find the probability of a student passing **without** _psi_ and a gpa of 3, we use:
+
+$x = -11.602 + (2.338 * 0) + (3.063 * 3) \rightarrow x = -11.602 + (3.063 * 3) \rightarrow x = -2.41 \rightarrow p = \frac{1}{1 + e^{2.41}} = 0.082$
+
+#### d)
+
+As shown in _b)_, using _psi_ increases the linear predictor by 2.338 and hence increases the odds of passing the assignment by a factor $e^{2.338} = 10.36$. This means that a student which has been taught using the _psi_ method is 10.36 times more likely to pass the assignment than a student who has been taught using the standard method. Given that _gpa_ is an independent variable, this number does **not** depend on the gpa of a student.
+
+#### e)
+
+$H_0:$ The probability of success of students receiving the _psi_ method is the same as that of students who get the traditional method.
+
+```{r}
+x <- matrix(c(3, 15, 8, 6), 2, 2)
+fisher.test(x)
+```
+
+15 represents the number of students who did not receive _psi_ and did **not** show improvement. 6 is the number of students who received _psi_ but did **not** show improvement. The _Fisher's exact test_ reports a p-value of $0.0265 < \alpha$ meaning that we can safely reject $H_0$ concluding that there is a significant difference in the probabilities of success for the two different teaching methods and that the _psi_teaching method seems to work.
+
+#### f)
+
+By studying and analysing the data in _a)_, we have found that the GPA of a student seems to affect also the passing rate of the students. Seeing that the Fisher's exact test for this contingency table does not take it into account, we think that this approach is **wrong**. 
+
+#### g)
+
+* Fisher's exact test is good and accurate (_exact_) for small datasets, especially for 2x2 contingency tables like the one we have.
+* It is hard to make predictions with Fisher's exact test, whilst the logistic regression model gives us the coefficients which are useful for making predictions as we did in _c)_.
+* Fisher's exact test gives us a more precise p-value to test our null hypotheses compared to that retrieved using the logisitc regression.
