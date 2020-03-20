@@ -8,7 +8,7 @@
 ---
 ## Exercise 1
 #### a)
-First add loglongevity to the dataframe. We draw plots to show the graphical summary of the data. 
+First add loglongevity to the dataframe. We draw plots to show the graphical summary of the data. \newline
 $H_0:$ The sexual activity does not affect longevity.
 ```{r}
 data=read.table(file="fruitflies.txt",header=TRUE)
@@ -60,7 +60,7 @@ We think the analyses with thorax length is better because from the test result 
 #### e)
 ```{r}
 qqnorm(residuals(fruitfliesaov2),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus ﬁtted plot")
+plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus fitted plot")
 ```
 From the normal qq plot of the residuals we can see that the spread is not normal. The plot of residuals versus fitted plot does not show any pattern which means no heteroscedasticity.
 
@@ -70,7 +70,7 @@ From the normal qq plot of the residuals we can see that the spread is not norma
 fruitflies$activity=as.factor(fruitflies$activity)
 fruitfliesaov4=lm(longevity~thorax+activity,data=fruitflies)
 qqnorm(residuals(fruitfliesaov4),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov4),residuals(fruitfliesaov2),main=" residuals versus ﬁtted plot")
+plot(fitted(fruitfliesaov4),residuals(fruitfliesaov2),main=" residuals versus fitted plot")
 ```
 If we use longevity rather than its logarithm, from the qq plot we can see that it is normally distributed. Comparing with logarithm as response, it is clear that logarithm is much better.
 
