@@ -8,7 +8,7 @@
 ---
 ## Exercise 1
 #### a)
-First add loglongevity to the dataframe. We draw plots to show the graphical summary of the data. \newline
+First add loglongevity to the dataframe. We draw plots to show the graphical summary of the data. 
 $H_0:$ The sexual activity does not affect longevity.
 ```{r}
 data=read.table(file="fruitflies.txt",header=TRUE)
@@ -20,29 +20,29 @@ boxplot(fruitflies$longevity~fruitflies$activity,data=fruitflies,xlab="sexual ac
 stripchart(fruitflies$longevity~fruitflies$activity,vertical=TRUE)
 fruitfliesaov=lm(loglongevity~activity,data=fruitflies)
 anova(fruitfliesaov)
-confint(fruitfliesaov)
+summary(fruitfliesaov)
 ```
-The p-value for testing $H_0$ is smaller than 0.05, thus we reject $H_0$. Which means regardless of thorax, sexual activity influences longevity. Use confidence interval to estimate longevity. For high sexual activity, estimated longevity is between 32 and 41; for isolated activity, longevity is between 46 and 83; for low sexual activity, longevity is between 41 and 73.
+The p-value for testing $H_0$ is smaller than 0.05, thus we reject $H_0$. Which means regardless of thorax, sexual activity influences longevity. Use confidence interval to estimate longevity. For high sexual activity, estimated longevity is 36.68; for isolated activity, longevity is between 61.52; for low sexual activity, longevity is between 54.59.
 
 
 #### b)
 $H_0$:The sexual activity does not affect longevity.
 ```{r}
-fruitflies$activity=as.factor(fruitflies$activity)
 fruitfliesaov2=lm(loglongevity~thorax+activity,data=fruitflies)
 drop1(fruitfliesaov2,test="F")
 ```
 The p-value for testing $H_0$ is smaller than 0.05, thus we reject $H_0$. Which means Taking thorax into consideration, sexual activity still has an influence on longevity.
 ```{r}
-contrasts(fruitflies$activity)=contr.sum
 fruitfliesaov3=lm(loglongevity~thorax+activity,data=fruitflies)
 summary(fruitfliesaov3)
 mean(fruitflies$thorax)
 ```
-We can calculate $\alpha_{3}=-\alpha_{1}-\alpha_{2}$. From the result of the test, we can find out that $alpha_{1}<alpha_{3}<alpha_{2}$, which means sexual activity decrease longevity. $\mu=1.45083,\beta=2.97899,\alpha_{1}=-0.23189,\alpha_{2}=0.17809,average_thorax=0.824533$. According to the model, for high sexual activity, the estimated longevity is about 39.46, for isolated sexual activity is about 59.47, for low sexual activity is about 52.50.
+From the result of the test, we can find out that $alpha_{1}<alpha_{3}<alpha_{2}$, which means sexual activity decrease longevity. According to the model, So longevity for isolated sexual activity is $e^{Y_{isolated}} = e^{4.09}=59.45$. Longevity for low is $e^{Y_{low}} = e^{3.96}=52.50$.
+Longevity for high is $e^{Y_{high}} = e^{3.68}=39.46$.
 
 #### c)
-$H_0$:The thorax does not affect longevity.
+$H_0:\mu_{isolated}=\mu_{high}$.
+$H_0:\mu_{low}=\mu_{high}$.
 ```{r}
 plot(loglongevity~thorax,pch=unclass(fruitflies$activity),data=fruitflies)
 abline(lm(loglongevity~thorax,data=fruitflies[c(1:25),]))
@@ -51,16 +51,16 @@ abline(lm(loglongevity~thorax,data=fruitflies[c(51:75),]))
 aovfruitfliesinter=lm(loglongevity~activity*thorax,data=fruitflies)
 summary(aovfruitfliesinter)
 ```
-From the test result, the estimate of activity1:thorax and activity2:thorax give the estimated differences. In the plot we can see that the lines are not parallel. The dependence is not similar under three conditions of sexual activity.
+From the test result, p-value for $H_0:\mu_{isolated}=\mu_{high}$ is 0.0545 and for $H_0:\mu_{low}=\mu_{high}$ is 0.2771, both bigger than 0.05. Thus we do not reject them. In the plot we can see that the lines can be parallel. So, the dependence is similar under three conditions of sexual activity.
 
 #### d)
-We think the analyses with thorax length is better because from the test result in c) we can see that thorax length does influence longevity, so we should take thorax length into consideration.
+We think the analyses with thorax length is better because from the test result in c) we can see that thorax length does influence longevity, so a)'s model does not meet the assumption of ANoVA, so we should take thorax length into consideration.
 
 
 #### e)
 ```{r}
 qqnorm(residuals(fruitfliesaov2),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus fitted plot")
+plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus ﬁtted plot")
 ```
 From the normal qq plot of the residuals we can see that the spread is not normal. The plot of residuals versus fitted plot does not show any pattern which means no heteroscedasticity.
 
@@ -70,9 +70,9 @@ From the normal qq plot of the residuals we can see that the spread is not norma
 fruitflies$activity=as.factor(fruitflies$activity)
 fruitfliesaov4=lm(longevity~thorax+activity,data=fruitflies)
 qqnorm(residuals(fruitfliesaov4),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov4),residuals(fruitfliesaov2),main=" residuals versus fitted plot")
+plot(fitted(fruitfliesaov4),residuals(fruitfliesaov4),main=" residuals versus ﬁtted plot")
 ```
-If we use longevity rather than its logarithm, from the qq plot we can see that it is normally distributed. Comparing with logarithm as response, it is clear that logarithm is much better.
+If we use longevity rather than its logarithm, from the plot we can see that the residuals versus fittede plot shows a certain pattern: with the growth of fitted, the redisuals' range grows bigger. Comparing with logarithm as response, it is clear that logarithm is much better.
 
 
 ## Exercise 2
