@@ -60,7 +60,7 @@ We think the analyses with thorax length is better because from the test result 
 #### e)
 ```{r}
 qqnorm(residuals(fruitfliesaov2),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus ﬁtted plot")
+plot(fitted(fruitfliesaov2),residuals(fruitfliesaov2),main=" residuals versus fitted plot")
 ```
 From the normal qq plot of the residuals we can see that the spread is not normal. The plot of residuals versus fitted plot does not show any pattern which means no heteroscedasticity.
 
@@ -70,7 +70,7 @@ From the normal qq plot of the residuals we can see that the spread is not norma
 fruitflies$activity=as.factor(fruitflies$activity)
 fruitfliesaov4=lm(longevity~thorax+activity,data=fruitflies)
 qqnorm(residuals(fruitfliesaov4),main="normal QQ-plot of the residuals")
-plot(fitted(fruitfliesaov4),residuals(fruitfliesaov4),main=" residuals versus ﬁtted plot")
+plot(fitted(fruitfliesaov4),residuals(fruitfliesaov4),main=" residuals versus fitted plot")
 ```
 If we use longevity rather than its logarithm, from the plot we can see that the residuals versus fittede plot shows a certain pattern: with the growth of fitted, the redisuals' range grows bigger. Comparing with logarithm as response, it is clear that logarithm is much better.
 
@@ -163,3 +163,60 @@ By studying and analysing the data in _a)_, we have found that the GPA of a stud
 * Fisher's exact test is good and accurate (_exact_) for small datasets, especially for 2x2 contingency tables like the one we have.
 * It is hard to make predictions with Fisher's exact test, whilst the logistic regression model gives us the coefficients which are useful for making predictions as we did in _c)_.
 * Fisher's exact test gives us a more precise p-value to test our null hypotheses compared to that retrieved using the logisitc regression.
+
+
+## Exercise 3
+
+##### a)
+
+```{r}
+afrdata=read.table(file="africa.txt",header=TRUE);
+pairs(afrdata);
+afrdataglm=glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim, family=poisson,data=afrdata);
+summary(afrdataglm)[12];
+```
+```{r}
+confint(afrdataglm)
+```
+
+
+$H_0$: The explanatory variable does not have a main effect on the number of successful military coups from independence to 1989.
+
+The p-value for oligarchy is 0.035 meaning that we can safely reject $H_0$ concluding that number years country ruled by military oligarchy from independence to 1989 has a significant effect on the number of successful military coups from independence to 1989. We are 95% confident that the mean number of successful military coups from independence to 1989 increases between 0.5% and 14% for each additional year country ruled by military oligarchy.
+
+The p-value for pollib is 0.0089 meaning that we reject $H_0$ concluding that political liberalization has an effect on the number of successful military coups from independence to 1989. We are 95% confident that the mean number of successful military coups from independence to 1989 decreases between 18% and 126% for each level the political liberalization increases. 
+
+The p-value for parties is 0.00595 meaning that we can safely reject $H_0$ concluding that number of legal political parties in 1993 has a significant effect on the number of successful military coups from independence to 1989. We are 95% confident that the mean number of successful military coups from independence to 1989 increases between 0.8% and 5% for each additional increase of legal political parties in 1993.
+
+```{r}
+par(mfrow=c(2,2));
+plot(fitted(afrdataglm),residuals(afrdataglm),main="residuals VS fitted values");plot(log(fitted(afrdataglm)),residuals(afrdataglm),main="residuals VS log fitted values");
+plot(log(fitted(afrdataglm)),residuals(afrdataglm,type="response"),main="response residuals VS fitted values")
+```
+
+From the plots above we can see some specific patterns which means the model does not fit in this case. 
+
+##### b)
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim,data=afrdata))[12]
+```
+
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec,data=afrdata))[12]
+```
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size,data=afrdata))[12]
+```
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties+popn+size,data=afrdata))[12]
+```
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties+popn,data=afrdata))[12]
+```
+
+```{r}
+summary(glm(miltcoup~oligarchy+pollib+parties,data=afrdata))[12]
+```
+By using the step down approach, we find that oligarchy, pollib, and parties are the essential in explaining the number of successful military coups from independence to 1989. Other explanatory variables:pctvote, popn, size, numelec, and numregim should be removed.
+
+The resulting model of the step-down method is: miltcoup = 1.62597 + 0.15261 $*$ oligarchy - 0.95419 $*$ pollib + 0.04239 $*$ parties + error
