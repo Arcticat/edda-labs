@@ -1,5 +1,16 @@
-## Exercise 1
-##### a)
+---
+  title: "Final Assignment"
+  author: "Andrea Di Dio, Chenghan Song, Jiacheng Lu --- Group 22"
+  fontsize: 10pt
+  output:
+    pdf_document: default
+    html_document: default
+---
+
+## Exercise *Trees*
+
+#### a)
+
 $H_0:$ The tree type does not affect volume.(without taking the diameter or height into account.)
 ```{r}
 treeVolume=read.table(file="treeVolume.txt",header=TRUE)
@@ -10,10 +21,12 @@ par(mfrow=c(1,2))
 plot(treeVolumeaov,1)
 plot(treeVolumeaov,2)
 ```
-From the test result, p-value is 0.1736, biggger than 0.05, so we do not reject $H_0$, which means without taking the diameter ot height into account, tree type does not inﬂuence volume. For beech, the estimated volume is 30.171, for oak, the estimated volume is $30.171+5.079=35.25$. In the normal qq plot we can see that it shows a certain curve not a straight line, so the model does not meet the assumption of anova.
 
 
-##### b)
+From the test result, p-value is 0.1736, bigger than 0.05 ($\alpha$), so we fail to reject $H_0$, concluding that, without taking the diameter ot height into account, tree type does not influence volume. For beech, the estimated volume is 30.171, for oak, the estimated volume is $30.171+5.079=35.25$. In the normal qq plot we can see that it shows a certain curve and not the straight qq line, so the model does not meet the normality assumption of anova.
+
+#### b)
+
 $H_0:$ The tree type does not affect volume.(including diameter and height as explanatory variables)
 ```{r}
 treeVolumeaov2=lm(volume~diameter+height+type,data=treeVolume)
@@ -27,21 +40,26 @@ par(mfrow=c(1,2))
 plot(treeVolumeaov2,1)
 plot(treeVolumeaov2,2)
 ```
-From the test result, we can see the p-value for $H_0$ is 0.143, so we do not reject $H_0$. $\mu=-63.78138, \beta_{diameter}=4.69806,\beta_{height}=0.41725, \alpha_{beech}=0, \alpha_{oak}=-1.30460$ for beech type, the estimated value is 33.20086; for oak type, the estimated volume is 31.89626. In the plot of residual against fitted, we can see the spread shows certain pattern, so the model is not good, does not meet the assumption.
 
-##### c)
-$H_0:$The dependence between diameter and volume is the same for different tree types.
+From the test result, we can see the p-value is 0.143, so we fail to reject $H_0$. $\mu=-63.78138, \beta_{diameter}=4.69806,\beta_{height}=0.41725, \alpha_{beech}=0, \alpha_{oak}=-1.30460$ for beech type, the estimated value is 33.20086; for oak type, the estimated volume is 31.89626. In the plot of residual against fitted, we can see the spread shows certain pattern (i.e., there is a systematic change in the residuals based on the fitted values), so the model is not good, suggesting that the assumption of linear relationship is not reasonable.
+
+#### c)
+
+$H_0:$The dependence between diameter and volume is the same for different tree types. (There is no dependence between diameter and volume for the tree types).
+
 ```{r}
 plot(volume~diameter,pch=unclass(type),data=treeVolume)
 for (i in c("oak",'beech')) abline(lm(volume~diameter,data=treeVolume[treeVolume$type==i,]))
 aovtreeVolumeinter=lm(volume~height+diameter*type,data=treeVolume)
 summary(aovtreeVolumeinter)
 ```
-From the plot we can see that with the growth of diameter, volume grows bigger. The p-value for $H_0$ is 0.474, so we do not reject $H_0$. The true lines in the plot is similar too.
+
+From the plot we can see that with the growth of diameter, volume grows bigger. The p-value for $H_0$ is 0.474, so we fail to reject $H_0$ concluding that there might not be a  dependence between the diameter and the volume for the two tree types. The true lines in the plot are similar too.
 
 
-##### d)
-For volume, $v=(\pi*d^2*h)/4$, so we transfrom diameter to $diameter^2$.
+#### d)
+
+For volume, $v=\frac{(\pi*d^2*h)}{4}$, so we transfrom diameter to $diameter^2$.
 ```{r}
 treeVolume$square_diameter=treeVolume$diameter^2
 treeVolumeaov3=lm(volume~square_diameter+height+type,data=treeVolume)
@@ -51,4 +69,8 @@ par(mfrow=c(1,2))
 plot(treeVolumeaov3,1)
 plot(treeVolumeaov3,2)
 ```
-We found out that the plot of residuals versus fitted, the spread does not show a certain pattern, the normal qq-plot shows a straight line as well, so use $diameter^2$ is much better.
+
+We found out that the plot of residuals versus fitted, the spread does not show a certain pattern, the normal qq-plot shows a straight line as well, this suggests that using $diameter^2$ is better for our model as the assumption of a linear relationship is shown to be more likely by the spread of the residuals versus fitted values and the normality can also be assumed looking at the normal QQ plot given that the points lie around the normal QQ line.
+
+
+
