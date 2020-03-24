@@ -24,7 +24,7 @@ forest=read.table(file="treeVolume.txt",header=TRUE);
 ## Exercise Jane Austen
 
 ##### a)
-The interest of contingency table test is in a possible dependency of the two factors. Thus it is suitable and appropriate for studying possible dependency between Austen's novels and an Austen's admirer's novel by counting the number of different words. 
+The interest of contingency table test is in a possible dependency of the two factors. Thus it is suitable and appropriate for studying possible dependency between Austen's novels and an Austen's admirer's novel(two factors) by counting the number of different words(categories). 
 
 ##### b)
 
