@@ -1,0 +1,54 @@
+## Exercise 1
+##### a)
+$H_0:$ The tree type does not affect volume.(without taking the diameter or height into account.)
+```{r}
+treeVolume=read.table(file="treeVolume.txt",header=TRUE)
+treeVolumeaov=lm(volume~type,data = treeVolume)
+anova(treeVolumeaov)
+summary(treeVolumeaov)
+par(mfrow=c(1,2))
+plot(treeVolumeaov,1)
+plot(treeVolumeaov,2)
+```
+From the test result, p-value is 0.1736, biggger than 0.05, so we do not reject $H_0$, which means without taking the diameter ot height into account, tree type does not inﬂuence volume. For beech, the estimated volume is 30.171, for oak, the estimated volume is $30.171+5.079=35.25$. In the normal qq plot we can see that it shows a certain curve not a straight line, so the model does not meet the assumption of anova.
+
+
+##### b)
+$H_0:$ The tree type does not affect volume.(including diameter and height as explanatory variables)
+```{r}
+treeVolumeaov2=lm(volume~diameter+height+type,data=treeVolume)
+drop1(treeVolumeaov2,test="F")
+summary(treeVolumeaov2)
+mean(treeVolume$diameter)
+mean(treeVolume$height)
+-63.78138-1.30460+4.69806*13.90678+75.84746*0.41725
+-63.78138+4.69806*13.90678+75.84746*0.41725
+par(mfrow=c(1,2))
+plot(treeVolumeaov2,1)
+plot(treeVolumeaov2,2)
+```
+From the test result, we can see the p-value for $H_0$ is 0.143, so we do not reject $H_0$. $\mu=-63.78138, \beta_{diameter}=4.69806,\beta_{height}=0.41725, \alpha_{beech}=0, \alpha_{oak}=-1.30460$ for beech type, the estimated value is 33.20086; for oak type, the estimated volume is 31.89626. In the plot of residual against fitted, we can see the spread shows certain pattern, so the model is not good, does not meet the assumption.
+
+##### c)
+$H_0:$The dependence between diameter and volume is the same for different tree types.
+```{r}
+plot(volume~diameter,pch=unclass(type),data=treeVolume)
+for (i in c("oak",'beech')) abline(lm(volume~diameter,data=treeVolume[treeVolume$type==i,]))
+aovtreeVolumeinter=lm(volume~height+diameter*type,data=treeVolume)
+summary(aovtreeVolumeinter)
+```
+From the plot we can see that with the growth of diameter, volume grows bigger. The p-value for $H_0$ is 0.474, so we do not reject $H_0$. The true lines in the plot is similar too.
+
+
+##### d)
+For volume, $v=(\pi*d^2*h)/4$, so we transfrom diameter to $diameter^2$.
+```{r}
+treeVolume$square_diameter=treeVolume$diameter^2
+treeVolumeaov3=lm(volume~square_diameter+height+type,data=treeVolume)
+drop1(treeVolumeaov3,test="F")
+summary(treeVolumeaov3)
+par(mfrow=c(1,2))
+plot(treeVolumeaov3,1)
+plot(treeVolumeaov3,2)
+```
+We found out that the plot of residuals versus fitted, the spread does not show a certain pattern, the normal qq-plot shows a straight line as well, so use $diameter^2$ is much better.
