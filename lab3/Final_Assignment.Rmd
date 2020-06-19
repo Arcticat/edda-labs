@@ -15,7 +15,7 @@ $H_0:$ The tree type does not affect volume.(without taking the diameter or heig
 
 ```{r}
 treeVolume=read.table(file="treeVolume.txt",header=TRUE)
-treeVolumeaov=lm(volume~type,data = treeVolume)
+treeVolumeaov=lm(volume~type, data = treeVolume)
 anova(treeVolumeaov)
 summary(treeVolumeaov)
 par(mfrow=c(1,2))
@@ -80,7 +80,7 @@ The interest of contingency table test is in finding a possible dependency betwe
 
 ##### b)
 
-$H_0$: There is no difference between the word counts/literary styles in Austen's three books. (The book and the words are two independent factors).
+$H_0$: There is no difference between the word counts/literary styles in Austen's three books.
 
 ```{r}
 book =read.table(file="austen.txt",header=TRUE);
